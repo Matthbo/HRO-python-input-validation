@@ -6,9 +6,6 @@ from sqlite3 import Error
 
 class Database:
 
-    def __init__(self):
-        self.conn = self.create_connection()
-
     def create_connection(self):
         conn = None
         try:
@@ -37,8 +34,10 @@ class Database:
             - password
             - role
         """
-        with self.conn:
-            c = self.conn.cursor() 
+
+        conn = self.create_connection()
+        with conn:
+            c = conn.cursor() 
             sql = ''' INSERT INTO Users (username, password, role) VALUES (?, ?, ?) '''
             try:
                 lst = list(User)
@@ -46,17 +45,19 @@ class Database:
                 lst[1] = self.encryptPassword(oldPassword)
                 newUser = tuple(lst)
                 c.execute(sql, newUser)
-                return c.lastrowid
+                
+                return self.getUser(User[0], User[1])
             except Error as e:
-                print(f'Failed to add new user ({type(e).__name__})')
-                return None
+                conn.close
+                raise DatabaseException()
     
     def getUser(self, userName, password):
-        with self.conn:
-            c = self.conn.cursor()
+        conn = self.create_connection()
+        with conn:
+            c = conn.cursor()
             sql = ''' SELECT * FROM Users WHERE username = ?'''
             un = (userName, )
-            if userName == 'Babak' and password == 'F*s3sj!pg!':
+            if userName == 'babak' and password == 'F*s3sj!pg!':
                 return u.SuperAdmin(userName)
             else:
                 try:
@@ -67,7 +68,7 @@ class Database:
                             if self.matchPassword(row[2], password):
                                 if row[3] == 'Admin':
                                     return u.Admin(userName)
-                                if row[3] == 'Advisor':
+                                elif row[3] == 'Advisor':
                                     return u.Advisor(userName)
                                 else:
                                     raise RoleException()
@@ -76,13 +77,38 @@ class Database:
                     else:
                         raise UsernameException()
                 except Error as e:
-                    print(type(e).__name__)
                     raise DatabaseException()
     
     def addClient(self, Client):
-        with self.conn:
-            pass
-
+        """
+        Client is a tuple and should contain (in order):
+            - full_name
+            - email_address
+            - mobile_phone
+            - street_house_number
+            - zipcode
+            - city
+        """
+        conn = self.create_connection()
+        with conn:
+            c = conn.cursor()
+            sqlAddress = ''' INSERT INTO Address (street_house_number, zipcode, city) VALUES (?, ?, ?); '''
+            sqlClient = ''' INSERT INTO Client (full_name, email_address, mobile_phone, address_id) VALUES (?, ?, ?, ?); '''
+            lst = []
+            for i in range(0, 5, 3):
+                lst.append((Client[i:i+3]))
+            addressTuple = lst[1]
+            clientList = list(lst[0])
+            try:
+                c.execute(sqlAddress, addressTuple)
+                addressId = c.lastrowid
+                clientList.append(addressId)
+                clientTuple = tuple(clientList)
+                c.execute(sqlClient, clientTuple)
+                response = u.Client(c.lastrowid, clientTuple[0], clientTuple[1], clientTuple[2], addressTuple)
+                return response
+            except Error as e:
+                raise DatabaseException()
 
 class RoleException(Exception):
     pass
@@ -95,4 +121,6 @@ class DatabaseException(Exception):
 
 class UsernameException(Exception):
     pass
-    
+
+class EmptyException(Exception):
+    pass

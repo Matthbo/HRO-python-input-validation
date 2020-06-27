@@ -2,7 +2,7 @@
 
 """
 Super Administrator login:
-Username: Babak
+Username: babak
 Password: F*s3sj!pg!
 """
 
@@ -18,6 +18,8 @@ class System:
     CITIES = ["Rotterdam", "The Hague", "Utrecht", "Amsterdam", "Groningen", "Maastricht", "Breda", "Eindhoven", "Leeuwarden", "Zwolle"]
     consolePrefix = '> '
     user = None
+    wrongLoginCount = 0
+    notPermittedCount = 0
 
     def __init__(self):
         self.DB = Database()
@@ -36,11 +38,14 @@ class System:
         self.prepare_input()
 
         for line in stdin:
-            consoleInput = line.rstrip().split(' ')
+            consoleInput = line.strip().translate(str.maketrans('', '', '\x00')).split(' ')
             command = consoleInput[0]
             args = consoleInput[1:]
 
             if command == "exit" or command == "stop":
+                break
+
+            if self.wrongLoginCount >= 5:
                 break
 
             switcher = {
@@ -48,6 +53,7 @@ class System:
                 'login': self.login,
                 'logout': self.logout,
                 'new-user': self.new_user,
+                'add-client': self.add_client,
             }
 
             res = switcher.get(command, "Invalid command, type 'help' for all commands")
@@ -61,15 +67,21 @@ class System:
 
     def login(self):
         if self.user == None:
-            username = input("Username: ")
+            username = input("Username: ").lower()
             password = input("Password: ")
 
             try:
                 self.user = self.DB.getUser(username, password)
+                self.wrongLoginCount = 0
                 print(f"Logged in as {self.user.username} ({self.user.ROLE})")
             except Exception as e:
                 if isinstance(e, PasswordException) or isinstance(e, UsernameException):
                     print("Wrong username or password!")
+                    self.wrongLoginCount += 1
+                    if self.wrongLoginCount >= 5:
+                        print("You are being kicked for login abuse")
+                        print("Closing system...")
+                        exit()
                 else:
                     print("Something went wrong")
                 
@@ -88,12 +100,18 @@ class System:
             self.user.new_user(self.DB)
         else:
             print("Not allowed!")
+    
+    def add_client(self):
+        if self.user != None and hasattr(self.user, 'add_client'):
+            self.user.add_client(self.DB, self.CITIES)
+        else:
+            print("Not allowed!")
 
     def getHelp(self):
         if(self.user != None):
             self.user.getHelp()
         else:
-            print("Use 'login' to log in, after that you can use 'help' for a list of available commands")
+            print("Use 'login' to log in, after that you can use 'help' for a list of available commands\nUse 'exit' or 'stop' to exit the system")
 
 # Start the application
 System()
