@@ -97,8 +97,11 @@ class SuperAdmin(User):
         password = input('Password: ').translate(str.maketrans('', '', '\x00'))
         password = validate_password(password)
 
-        newUser = db.addUser((username, password, "Admin"))
-        print(f"Created new user {newUser.username} ({newUser.ROLE})")
+        try:
+            newUser = db.addUser((username, password, "Admin"))
+            print(f"Created new user {newUser.username} ({newUser.ROLE})")
+        except Exception as e:
+            print('Failed to create user')
 
 # The system administrator
 class Admin(User):
@@ -116,8 +119,11 @@ class Admin(User):
         password = input('Password: ').translate(str.maketrans('', '', '\x00'))
         password = validate_password(password)
 
-        newUser = db.addUser((username, password, "Advisor"))
-        print(f"Created new user {newUser.username} ({newUser.ROLE})")
+        try:
+            newUser = db.addUser((username, password, "Advisor"))
+            print(f"Created new user {newUser.username} ({newUser.ROLE})")
+        except Exception as e:
+            print('Failed to create user')
 
     def add_client(self, db, cities):
         print('Adding a new client')
@@ -139,8 +145,11 @@ class Admin(User):
         city = input('City: ')
         city = validate_city(city, cities)
 
-        newClient = db.addClient((fullName, email, mobilePhone, streetHouseNumber, zipcode, city))
-        print(f"Added new client {newClient.fullName} ({newClient.emailAddress})")
+        try:
+            newClient = db.addClient((fullName, email, mobilePhone, streetHouseNumber, zipcode, city))
+            print(f"Added new client {newClient.fullName} ({newClient.emailAddress})")
+        except Exception as e:
+            print('Failed to add a new client')
 
 # The advisor
 class Advisor(User):

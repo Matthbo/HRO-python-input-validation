@@ -2,8 +2,6 @@ import sqlite3, hashlib, uuid
 import users as u
 from sqlite3 import Error
 
-
-
 class Database:
 
     def create_connection(self):
@@ -27,7 +25,6 @@ class Database:
 
     
     def addUser(self, User):
-
         """
         User is an tuple and should contain (in order):
             - username
@@ -43,12 +40,13 @@ class Database:
                 lst = list(User)
                 oldPassword = User[1]
                 lst[1] = self.encryptPassword(oldPassword)
+                print(lst)
                 newUser = tuple(lst)
                 c.execute(sql, newUser)
+                conn.commit()
                 
                 return self.getUser(User[0], User[1])
             except Error as e:
-                conn.close
                 raise DatabaseException()
     
     def getUser(self, userName, password):
@@ -66,12 +64,15 @@ class Database:
                     if (len(rows) != 0):
                         for row in rows:
                             if self.matchPassword(row[2], password):
-                                if row[3] == 'Admin':
-                                    return u.Admin(userName)
-                                elif row[3] == 'Advisor':
-                                    return u.Advisor(userName)
+                                if row[4] != True:
+                                    if row[3] == 'Admin':
+                                        return u.Admin(userName)
+                                    elif row[3] == 'Advisor':
+                                        return u.Advisor(userName)
+                                    else:
+                                        raise RoleException()
                                 else:
-                                    raise RoleException()
+                                    raise BannedException()
                             else:
                                 raise PasswordException()
                     else:
@@ -110,6 +111,17 @@ class Database:
             except Error as e:
                 raise DatabaseException()
 
+    def banUser(self, username):
+        conn = self.create_connection()
+        with conn:
+            c = conn.cursor()
+            sql = ''' UPDATE Users SET is_banned = ? WHERE username = ? '''
+            try:
+                c.execute(sql, (True, username))
+                conn.commit()
+            except Error as e:
+                raise DatabaseException()
+
 class RoleException(Exception):
     pass
 
@@ -123,4 +135,7 @@ class UsernameException(Exception):
     pass
 
 class EmptyException(Exception):
+    pass
+
+class BannedException(Exception):
     pass
