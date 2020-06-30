@@ -1,47 +1,79 @@
 import re
+from logger import Logger, LogEntry
 
-def validate_email(email):
+log = Logger()
+
+def validate_email(email, user):
     while not re.match("^[\w.+-]+@[\w.-]+\.\w{2,}$", email):
-        print("Invalid email address, it should look like 'person@example.com'")
-        email = input("Email: ").translate(str.maketrans('', '', '\x00'))
+        try:
+            log.addLogEntry(LogEntry(2, user, "[validate-email] User tried to create a client with a wrong email address"))
+            print("Invalid email address, it should look like 'person@example.com'")
+            email = input("Email: ").translate(str.maketrans('', '', '\x00'))
+        except Exception as e:
+            print(f"Something went wrong. ({type(e).__name__})")
     else:
         return email
 
-def validate_phone(mobilePhone):
+
+def validate_phone(mobilePhone, user):
     while not re.match("^\+31-6-[\d]{4}-[\d]{4}$", mobilePhone):
-        print("Invalid phone number, it should look like '+31-6-0123-4567'")
-        mobilePhone = input("Mobile phone: ").translate(str.maketrans('', '', '\x00'))
+        try:
+            log.addLogEntry(LogEntry(2, user, "[validate-phone] User tried to create a client with a wrong phone number"))
+            print("Invalid phone number, it should look like '+31-6-0123-4567'")
+            mobilePhone = input("Mobile phone: ").translate(str.maketrans('', '', '\x00'))
+        except Exception as e:
+            print(f"Something went wrong. ({type(e).__name__})")
     else:
         return mobilePhone
 
-def validate_streethouse(streetHouse):
+
+def validate_streethouse(streetHouse, user):
     while not re.match("^[\w ]+ [\d]+[a-z]?$", streetHouse):
-        print("Invalid street & house number: it should look like 'Streetname 12'")
-        streetHouse = input("Street & house number: ").translate(str.maketrans('', '', '\x00'))
+        try:
+            log.addLogEntry(LogEntry(2, user, "[validate-streethouse] User tried to create a client with a wrong address (street and house number)"))
+            print("Invalid street & house number: it should look like 'Streetname 12'")
+            streetHouse = input("Street & house number: ").translate(str.maketrans('', '', '\x00'))
+        except Exception as e:
+            print(f"Something went wrong. ({type(e).__name__})")
     else:
         return streetHouse
 
-def validate_zipcode(zipcode):
+
+def validate_zipcode(zipcode, user):
     while not re.match("^\d{4}[A-Z]{2}$", zipcode):
-        print("Invalid zipcode: it should look like '1234AB'")
-        zipcode = input("Zipcode: ").upper().translate(str.maketrans('', '', '\x00'))
+        try:
+            log.addLogEntry(LogEntry())
+            print("Invalid zipcode: it should look like '1234AB'")
+            zipcode = input("Zipcode: ").upper().translate(str.maketrans('', '', '\x00'))
+        except Exception as e:
+            print(f"Something went wrong. ({type(e).__name__})")
     else:
         return zipcode
 
-def validate_city(city, cities):
+
+def validate_city(city, cities, user):
     while not city in cities:
-        print("Invalid city, choose from: " + ", ".join(cities))
-        city = input("City: ").translate(str.maketrans('', '', '\x00'))
+        try:
+            log.addLogEntry(LogEntry(2, user, "[validate-city] User tried to create a client with a wrong city."))
+            print("Invalid city, choose from: " + ", ".join(cities))
+            city = input("City: ").translate(str.maketrans('', '', '\x00'))
+        except Exception as e:
+            print(f"Something went wrong. ({type(e).__name__})")
     else:
         return city
 
-def validate_username(username):
+
+def validate_username(username, user):
     while not re.match("^[a-z]{1}[a-z0-9\.\-\_\']{4,19}$", username):
-        print("Given username is invalid:\n"
-        + " - The username must be between 5 and 20 characters long\n"
-        + " - Start with letter\n"
-        + " - Contain only letters, numbers and .-_\' characters")
-        username = input("Username: ").lower().translate(str.maketrans('', '', '\x00'))
+        try:
+            log.addLogEntry(LogEntry(2, user, "[validate-username] User tried to create a user with a wrong username."))
+            print("Given username is invalid:\n"
+            + " - The username must be between 5 and 20 characters long\n"
+            + " - Start with letter\n"
+            + " - Contain only letters, numbers and .-_\' characters")
+            username = input("Username: ").lower().translate(str.maketrans('', '', '\x00'))
+        except Exception as e:
+            print(f"Something went wrong. ({type(e).__name__})")
     else:
         return username
 
@@ -57,14 +89,17 @@ def validate_password(password):
     while not re.match(
             "^(?=(?:.*[A-Z]){1,})(?=(?:.*[a-z]){1,})(?=(?:.*\d){1,})(?=(?:.*[\~\!\@\#\$\%\^\&\*\_\-\+\=\`\|\\\(\)\{\}\[\]\:\;\'\<\>\,\.\?\/]){1,})([A-Za-z0-9\~\!\@\#\$\%\^\&\*\_\-\+\=\`\|\\\(\)\{\}\[\]\:\;\'\<\>\,\.\?\/]{8,30})$", password
         ):
-        print(
-            "Given password is invalid, the password should have: \n"
-            + " - at least 8 characters \n"
-            + " - a maximum of 30 characters \n"
-            + " - can contain letters (a-z), (A-Z), numbers (0-9), Special characters such as ~!@#$%^&*_-+=`|\(){}[]:;'<>,.?/. \n" 
-            + " - must have a combination of at least one lowercase letter, one uppercase letter, one digit, and one specialcharacter"
-        )
-        password = input("Password: ").translate(str.maketrans('', '', '\x00'))
+        try:
+            print(
+                "Given password is invalid, the password should have: \n"
+                + " - at least 8 characters \n"
+                + " - a maximum of 30 characters \n"
+                + " - can contain letters (a-z), (A-Z), numbers (0-9), Special characters such as ~!@#$%^&*_-+=`|\(){}[]:;'<>,.?/. \n" 
+                + " - must have a combination of at least one lowercase letter, one uppercase letter, one digit, and one specialcharacter"
+            )
+            password = input("Password: ").translate(str.maketrans('', '', '\x00'))
+        except Exception as e:
+            print(f"Something has changed. ({type(e).__name__})")
     else:
         return password
 
@@ -92,16 +127,21 @@ class SuperAdmin(User):
     def new_user(self, db):
         print("Creating a new System Administrator")
         username = input('Username: ').lower().translate(str.maketrans('', '', '\x00'))
-        username = validate_username(username)
+        username = validate_username(username, self.username)
 
         password = input('Password: ').translate(str.maketrans('', '', '\x00'))
-        password = validate_password(password)
+        password = validate_password(password, self.username)
 
         try:
+            log.addLogEntry(LogEntry(3, self.username, f"[new-user] User added with username: {username}"))
             newUser = db.addUser((username, password, "Admin"))
             print(f"Created new user {newUser.username} ({newUser.ROLE})")
         except Exception as e:
-            print('Failed to create user')
+            try:
+                log.addLogEntry(LogEntry(2, self.username, "[new user] Failed to create user."))
+                print('Failed to create user')
+            except Exception as ex:
+                print(f"Something went wrong. ({type(ex).__name__})")
 
 # The system administrator
 class Admin(User):
@@ -114,42 +154,52 @@ class Admin(User):
     def new_user(self, db):
         print("Creating a new Advisor")
         username = input('Username: ').lower().translate(str.maketrans('', '', '\x00'))
-        username = validate_username(username)
+        username = validate_username(username, self.username)
 
         password = input('Password: ').translate(str.maketrans('', '', '\x00'))
-        password = validate_password(password)
+        password = validate_password(password, self.username)
 
         try:
+            log.addLogEntry(LogEntry(3, self.username, f"[new-user] User added with username: {username}"))
             newUser = db.addUser((username, password, "Advisor"))
             print(f"Created new user {newUser.username} ({newUser.ROLE})")
         except Exception as e:
-            print('Failed to create user')
+            try:
+                log.addLogEntry(LogEntry(2, self.username, "[new-user] Failed to create user"))
+                print('Failed to create user')
+            except Exception as ex:
+                print(f"Something went wrong. ({type(ex).__name__})")
 
     def add_client(self, db, cities):
         print('Adding a new client')
         fullName = input('Full name: ').translate(str.maketrans('', '', '\x00'))
         
         email = input('Email: ').translate(str.maketrans('', '', '\x00'))
-        email = validate_email(email)
+        email = validate_email(email, self.username)
 
         mobilePhone = input('Mobile phone: ').translate(str.maketrans('', '', '\x00'))
-        mobilePhone = validate_phone(mobilePhone)
+        mobilePhone = validate_phone(mobilePhone, self.username)
 
         streetHouseNumber = input('Street & house number: ').translate(str.maketrans('', '', '\x00'))
-        streetHouseNumber = validate_streethouse(streetHouseNumber)
+        streetHouseNumber = validate_streethouse(streetHouseNumber, self.username)
 
         zipcode = input('Zipcode: ').upper().translate(str.maketrans('', '', '\x00'))
-        zipcode = validate_zipcode(zipcode)
+        zipcode = validate_zipcode(zipcode, self.username)
 
         print('Available cities: ' + ', '.join(cities))
         city = input('City: ')
-        city = validate_city(city, cities)
+        city = validate_city(city, cities, self.username)
 
         try:
             newClient = db.addClient((fullName, email, mobilePhone, streetHouseNumber, zipcode, city))
+            log.addLogEntry(LogEntry(3, self.username, f"[add-client] Client {fullName} added."))
             print(f"Added new client {newClient.fullName} ({newClient.emailAddress})")
         except Exception as e:
-            print('Failed to add a new client')
+            try:
+                log.addLogEntry(LogEntry(2, self.username, "[add-client] Failed to add client."))
+                print('Failed to add a new client')
+            except Exception as ex:
+                print(f"Something went wrong. ({type(ex).__name__})")
 
 # The advisor
 class Advisor(User):

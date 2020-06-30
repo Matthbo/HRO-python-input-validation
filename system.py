@@ -12,6 +12,7 @@ Password: F*s3sj!pg!
 
 from sys import stdin, stdout, stderr
 from database import Database, RoleException, UsernameException, PasswordException, DatabaseException, BannedException
+from logger import Logger, LogEntry
 
 # The system console which receives all input
 class System:
@@ -20,6 +21,7 @@ class System:
     user = None
     wrongLoginCount = 0
     notPermittedCount = 0
+    log = Logger()
 
     def __init__(self):
         self.DB = Database()
@@ -75,43 +77,86 @@ class System:
                 self.wrongLoginCount = 0
                 self.notPermittedCount = 0
                 print(f"Logged in as {self.user.username} ({self.user.ROLE})")
+                self.log.addLogEntry(LogEntry(3, username, "[login] User logged in"))
             except Exception as e:
                 if isinstance(e, PasswordException) or isinstance(e, UsernameException):
-                    print("Wrong username or password!")
                     self.wrongLoginCount += 1
+                    try:
+                        self.log.addLogEntry(LogEntry(3, username, "[login] User tried to log in with wrong credentials"))
+                        print("Wrong username or password!")
+                    except Exception as ex:
+                        print(f"Something went wrong. ({type(e).__name__})")
                     if self.wrongLoginCount >= 5:
-                        print("You are being kicked for login abuse")
-                        print("Closing system...")
-                        exit()
+                        try:
+                            print("You are being kicked for login abuse")
+                            self.log.addLogEntry(LogEntry(2, username, "[login] User kicked after logging in with wrong credentials 5 times"))
+                            print("Closing system...")
+                            exit()
+                        except Exception as ex:
+                            print(f"something went wrong. ({type(ex).__name__})")
                 elif isinstance(e, BannedException):
-                    print("You are banned!")
+                    try:
+                        self.log.addLogEntry(LogEntry(2, username, "[login] Banned user tried to log in"))
+                        print("You are banned!")
+                    except Exception as ex:
+                        print(f"Something went wrong. ({type(ex).__name__})")
                 else:
-                    print("Something went wrong")
+                    try:
+                        self.log.addLogEntry(LogEntry(1, username, f"[login] Error occured when trying to log in. ({type(e).__name__})"))
+                        print("Something went wrong")
+                    except Exception as ex:
+                        print(f"Something went wrong ({type(ex).__name__})")
                 
         else:
-            print(f"Already logged in as {self.user.username} ({self.user.ROLE})")
+            try:
+                self.log.addLogEntry(LogEntry(1, username, "[login] User tried to log in while already being logged in."))
+                print(f"Already logged in as {self.user.username} ({self.user.ROLE})")
+            except Exception as ex:
+                print(f"Something went wrong. ({type(ex).__name__})")
     
     def logout(self):
         if self.user != None:
-            self.user = None
-            self.notPermittedCount = 0
-            print("You are now logged out")
+            try:
+                self.log.addLogEntry(LogEntry(3, self.user.username, "[logout] User logged out."))
+                self.user = None
+                self.notPermittedCount = 0
+                print("You are now logged out")
+            except Exception as e:
+                print(f"Something went wrong. ({type(e).__name__})")
         else:
+            try:
+                self.log.addLogEntry(LogEntry(1, None, "[logout] User tried to log out while already boing logged out."))
+            except Exception as e:
+                print(f"Something went wrong. ({type(e).__name__})")
             print("You are already logged out!")
 
     def new_user(self):
-        if self.user != None and hasattr(self.user, 'new_user'):
-            self.user.new_user(self.DB)
-        else:
-            print("Not allowed!")
-            self.checkForBan()
+        try:
+            if self.user != None and hasattr(self.user, 'new_user'):
+                self.user.new_user(self.DB)
+            elif (self.user != None):
+                self.log.addLogEntry(LogEntry(1, self.user.username, "[new-user] Unauthorized user tried to make a new user"))
+                print("Not allowed!")
+                self.checkForBan()
+            else:
+                self.log.addLogEntry(LogEntry(1, None, "[new-user] Someone without an account tried to make a new user."))
+                self.checkForBan()
+        except Exception as e:
+            print(f"Something went wrong. ({type(e).__name__})")  
     
     def add_client(self):
-        if self.user != None and hasattr(self.user, 'add_client'):
-            self.user.add_client(self.DB, self.CITIES)
-        else:
-            print("Not allowed!")
-            self.checkForBan()
+        try:
+            if self.user != None and hasattr(self.user, 'add_client'):
+                self.user.add_client(self.DB, self.CITIES)
+            elif self.user != None:
+                self.log.addLogEntry(LogEntry(1, self.user.username, "[add-client] Unauthorized user tried to make a new client"))
+                print("Not allowed!")
+                self.checkForBan()
+            else:
+                self.log.addLogEntry(LogEntry(1, None, "[add-client] Someone without an account tried to make a new user"))
+                self.checkForBan()
+        except Exception as e:
+            print(f"Something went wrong. ({type(e).__name__})")
 
     def getHelp(self):
         if(self.user != None):
@@ -120,18 +165,22 @@ class System:
             print("Use 'login' to log in, after that you can use 'help' for a list of available commands\nUse 'exit' or 'stop' to exit the system")
     
     def checkForBan(self):
-        if self.user.ROLE != "Super Administrator":
-            self.notPermittedCount += 1
-
-        if self.notPermittedCount >= 4:
+        try:
             if self.user != None and self.user.ROLE != "Super Administrator":
-                print("You are banned from the system")
-                self.DB.banUser(self.user.username)
-                self.logout()
-            elif self.user == None:
-                print("You are being kicked for unauthorized command abuse")
-                print("Closing system...")
-                exit()
+                self.notPermittedCount += 1
+            if self.notPermittedCount >= 4:
+                if self.user != None and self.user.ROLE != "Super Administrator":
+                    print("You are banned from the system")
+                    self.log.addLogEntry(LogEntry(1, self.user.username, "[banned] user got banned"))
+                    self.DB.banUser(self.user.username)
+                    self.logout()
+                elif self.user == None:
+                    self.log.addLogEntry(LogEntry(1, None, "[Kicked] Someone with no account got kicked for unauthorized command abuse"))
+                    print("You are being kicked for unauthorized command abuse")
+                    print("Closing system...")
+                    exit()
+        except Exception as e:
+            print(f"Something went wrong. ({type(e).__name__})")
 
 # Start the application
 System()
