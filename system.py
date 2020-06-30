@@ -6,10 +6,6 @@ Username: babak
 Password: F*s3sj!pg!
 """
 
-# helpful links:
-# Console app recommendations: https://stackoverflow.com/a/39068747
-# isinstance: https://pynative.com/python-isinstance-explained-with-examples/
-
 from sys import stdin, stdout, stderr
 from database import Database, RoleException, UsernameException, PasswordException, DatabaseException, BannedException
 from logger import Logger, LogEntry
@@ -56,6 +52,7 @@ class System:
                 'logout': self.logout,
                 'new-user': self.new_user,
                 'add-client': self.add_client,
+                'get-logs': self.get_logs,
             }
 
             res = switcher.get(command, "Invalid command, type 'help' for all commands")
@@ -134,13 +131,15 @@ class System:
         try:
             if self.user != None and hasattr(self.user, 'new_user'):
                 self.user.new_user(self.DB)
-            elif (self.user != None):
-                self.log.addLogEntry(LogEntry(1, self.user.username, "[new-user] Unauthorized user tried to make a new user"))
+            else:
+                if self.user != None:
+                    self.log.addLogEntry(LogEntry(1, self.user.username, "[new-user] Unauthorized user tried to make a new user"))
+                else:
+                    self.log.addLogEntry(LogEntry(1, None, "[new-user] Someone without an account tried to make a new user."))
+
                 print("Not allowed!")
                 self.checkForBan()
-            else:
-                self.log.addLogEntry(LogEntry(1, None, "[new-user] Someone without an account tried to make a new user."))
-                self.checkForBan()
+                
         except Exception as e:
             print(f"Something went wrong. ({type(e).__name__})")  
     
@@ -148,15 +147,31 @@ class System:
         try:
             if self.user != None and hasattr(self.user, 'add_client'):
                 self.user.add_client(self.DB, self.CITIES)
-            elif self.user != None:
-                self.log.addLogEntry(LogEntry(1, self.user.username, "[add-client] Unauthorized user tried to make a new client"))
-                print("Not allowed!")
-                self.checkForBan()
             else:
-                self.log.addLogEntry(LogEntry(1, None, "[add-client] Someone without an account tried to make a new user"))
+                if self.user != None:
+                    self.log.addLogEntry(LogEntry(1, self.user.username, "[add-client] Unauthorized user tried to make a new client"))
+                else:
+                    self.log.addLogEntry(LogEntry(1, None, "[add-client] Someone without an account tried to make a new user"))
+
+                print("Not allowed!")
                 self.checkForBan()
         except Exception as e:
             print(f"Something went wrong. ({type(e).__name__})")
+
+    def get_logs(self):
+        try:
+            if self.user != None and hasattr(self.user, 'get_logs'):
+                self.user.get_logs(self.DB)
+            else:
+                if self.user != None:
+                    self.log.addLogEntry(LogEntry(1, self.user.username, "[get-logs] Unauthorized user tried to get the logs"))
+                else:
+                    self.log.addLogEntry(LogEntry(1, None, "[get-logs] Someone without an account tried to get the logs"))
+
+                print("Not allowed!")
+                self.checkForBan()
+        except Exception as e:
+            print(f"Something went wrong.1 ({type(e).__name__})\n{e}")
 
     def getHelp(self):
         if(self.user != None):
@@ -166,8 +181,7 @@ class System:
     
     def checkForBan(self):
         try:
-            if self.user != None and self.user.ROLE != "Super Administrator":
-                self.notPermittedCount += 1
+            self.notPermittedCount += 1
             if self.notPermittedCount >= 4:
                 if self.user != None and self.user.ROLE != "Super Administrator":
                     print("You are banned from the system")

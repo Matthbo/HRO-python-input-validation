@@ -3,11 +3,11 @@ import datetime, sqlite3
 from sqlite3 import Error
 
 class LogEntry:
-    def __init__(self, priority, user_name, log_text, id=None, time=datetime.datetime.now()):
+    def __init__(self, priority, user_name, log_text, id=None, time=None):
         self.priority = priority
         self.user_name = user_name
         self.log_text = log_text
-        self.time = time
+        self.time = time if time != None else datetime.datetime.now() # fixes not correctly getting current timestamp
         self.id = id
 
     def getTuple(self):

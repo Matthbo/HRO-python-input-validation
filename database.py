@@ -40,7 +40,6 @@ class Database:
                 lst = list(User)
                 oldPassword = User[1]
                 lst[1] = self.encryptPassword(oldPassword)
-                print(lst)
                 newUser = tuple(lst)
                 c.execute(sql, newUser)
                 conn.commit()
