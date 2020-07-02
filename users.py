@@ -126,7 +126,7 @@ def validate_password(password, user):
 # Base class for all users
 class User:
     ROLE = None
-    COMMANDS = "help,logout"
+    COMMANDS = "help,logout,exit,stop"
     username = None
 
     def __init__(self, username):
@@ -171,7 +171,8 @@ class SuperAdmin(User):
         try:
             logRows = log.getLogs(priority)
             for entryLog in logRows:
-                print(f"{entryLog.time} | {entryLog.user_name } | {entryLog.log_text}")
+                colour = ["31;40", "33;40", "37;40"]
+                print(f"\033[{colour[int(entryLog.priority) - 1]}m{entryLog.time} | {entryLog.user_name } | {entryLog.log_text} \033[0m")
         except Exception as e:
             print("Couldn't retrieve logs (there may be none with the correct priority yet)")
 

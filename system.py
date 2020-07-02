@@ -38,7 +38,7 @@ class System:
         for line in stdin:
             consoleInput = line.strip().translate(str.maketrans('', '', '\x00')).split(' ')
             command = consoleInput[0]
-            args = consoleInput[1:]
+#            args = consoleInput[1:]
 
             if command == "exit" or command == "stop":
                 break
@@ -79,7 +79,7 @@ class System:
                 if isinstance(e, PasswordException) or isinstance(e, UsernameException):
                     self.wrongLoginCount += 1
                     try:
-                        self.log.addLogEntry(LogEntry(3, username, "[login] User tried to log in with wrong credentials"))
+                        self.log.addLogEntry(LogEntry(2, username, "[login] User tried to log in with wrong credentials"))
                         print("Wrong username or password!")
                     except Exception as ex:
                         print(f"Something went wrong. ({type(e).__name__})")

@@ -45,7 +45,7 @@ class Database:
                 conn.commit()
                 
                 return self.getUser(User[0], User[1])
-            except Error as e:
+            except Error:
                 raise DatabaseException()
     
     def getUser(self, userName, password):
@@ -76,7 +76,7 @@ class Database:
                                 raise PasswordException()
                     else:
                         raise UsernameException()
-                except Error as e:
+                except Error:
                     raise DatabaseException()
     
     def addClient(self, Client):
@@ -107,7 +107,7 @@ class Database:
                 c.execute(sqlClient, clientTuple)
                 response = u.Client(c.lastrowid, clientTuple[0], clientTuple[1], clientTuple[2], addressTuple)
                 return response
-            except Error as e:
+            except Error:
                 raise DatabaseException()
 
     def banUser(self, username):
@@ -118,7 +118,7 @@ class Database:
             try:
                 c.execute(sql, (True, username))
                 conn.commit()
-            except Error as e:
+            except Error:
                 raise DatabaseException()
 
 class RoleException(Exception):
