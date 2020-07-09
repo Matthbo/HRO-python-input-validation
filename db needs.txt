@@ -1,4 +1,0 @@
-Tables:
-- User (id (int), username, password, role)
-- Client (id, full name, address_id, emailAddress, mobilePhone)
-- Address(id, street & house number, zipcode, city)

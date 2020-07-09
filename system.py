@@ -66,8 +66,8 @@ class System:
 
     def login(self):
         if self.user == None:
-            username = input("Username: ").lower()
-            password = input("Password: ")
+            username = input("Username: ").lower().translate(str.maketrans('', '', '\x00'))
+            password = input("Password: ").translate(str.maketrans('', '', '\x00'))
 
             try:
                 self.user = self.DB.getUser(username, password)
@@ -82,7 +82,7 @@ class System:
                         self.log.addLogEntry(LogEntry(2, username, "[login] User tried to log in with wrong credentials"))
                         print("Wrong username or password!")
                     except Exception as ex:
-                        print(f"Something went wrong. ({type(e).__name__})")
+                        print(f"Something went wrong. ")
                     if self.wrongLoginCount >= 5:
                         try:
                             print("You are being kicked for login abuse")
@@ -90,26 +90,26 @@ class System:
                             print("Closing system...")
                             exit()
                         except Exception as ex:
-                            print(f"something went wrong. ({type(ex).__name__})")
+                            print(f"something went wrong. ")
                 elif isinstance(e, BannedException):
                     try:
                         self.log.addLogEntry(LogEntry(2, username, "[login] Banned user tried to log in"))
                         print("You are banned!")
                     except Exception as ex:
-                        print(f"Something went wrong. ({type(ex).__name__})")
+                        print(f"Something went wrong. ")
                 else:
                     try:
-                        self.log.addLogEntry(LogEntry(1, username, f"[login] Error occured when trying to log in. ({type(e).__name__})"))
+                        self.log.addLogEntry(LogEntry(1, username, f"[login] Error occured when trying to log in. "))
                         print("Something went wrong")
                     except Exception as ex:
-                        print(f"Something went wrong ({type(ex).__name__})")
+                        print(f"Something went wrong ")
                 
         else:
             try:
                 self.log.addLogEntry(LogEntry(1, username, "[login] User tried to log in while already being logged in."))
                 print(f"Already logged in as {self.user.username} ({self.user.ROLE})")
             except Exception as ex:
-                print(f"Something went wrong. ({type(ex).__name__})")
+                print(f"Something went wrong. ")
     
     def logout(self):
         if self.user != None:
@@ -119,12 +119,12 @@ class System:
                 self.notPermittedCount = 0
                 print("You are now logged out")
             except Exception as e:
-                print(f"Something went wrong. ({type(e).__name__})")
+                print(f"Something went wrong. ")
         else:
             try:
                 self.log.addLogEntry(LogEntry(1, None, "[logout] User tried to log out while already boing logged out."))
             except Exception as e:
-                print(f"Something went wrong. ({type(e).__name__})")
+                print(f"Something went wrong. ")
             print("You are already logged out!")
 
     def new_user(self):
@@ -141,7 +141,7 @@ class System:
                 self.checkForBan()
                 
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")  
+            print(f"Something went wrong. ")  
     
     def add_client(self):
         try:
@@ -156,7 +156,7 @@ class System:
                 print("Not allowed!")
                 self.checkForBan()
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")
+            print(f"Something went wrong. ")
 
     def get_logs(self):
         try:
@@ -171,7 +171,7 @@ class System:
                 print("Not allowed!")
                 self.checkForBan()
         except Exception as e:
-            print(f"Something went wrong.1 ({type(e).__name__})\n{e}")
+            print(f"Something went wrong.1 \n{e}")
 
     def getHelp(self):
         if(self.user != None):
@@ -194,7 +194,7 @@ class System:
                     print("Closing system...")
                     exit()
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")
+            print(f"Something went wrong. ")
 
 # Start the application
 System()

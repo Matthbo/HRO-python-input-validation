@@ -11,7 +11,7 @@ def validate_email(email, user):
             print("Invalid email address, it should look like 'person@example.com'")
             email = input("Email: ").translate(str.maketrans('', '', '\x00'))
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")
+            print(f"Something went wrong. ")
     else:
         return email
 
@@ -24,7 +24,7 @@ def validate_phone(mobilePhone, user):
             mobilePhone = input("Mobile phone: ").translate(
                 str.maketrans('', '', '\x00'))
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")
+            print(f"Something went wrong. ")
     else:
         return mobilePhone
 
@@ -37,7 +37,7 @@ def validate_streethouse(streetHouse, user):
             streetHouse = input("Street & house number: ").translate(
                 str.maketrans('', '', '\x00'))
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")
+            print(f"Something went wrong. ")
     else:
         return streetHouse
 
@@ -50,7 +50,7 @@ def validate_zipcode(zipcode, user):
             zipcode = input("Zipcode: ").upper().translate(
                 str.maketrans('', '', '\x00'))
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")
+            print(f"Something went wrong. ")
     else:
         return zipcode
 
@@ -62,7 +62,7 @@ def validate_city(city, cities, user):
             print("Invalid city, choose from: " + ", ".join(cities))
             city = input("City: ").translate(str.maketrans('', '', '\x00'))
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")
+            print(f"Something went wrong. ")
     else:
         return city
 
@@ -73,7 +73,7 @@ def validate_priority(priority, user):
             print("Invalid priority, pick either 1, 2 or 3")
             priority = input("Minimum priority: ").translate(str.maketrans('', '', '\x00'))
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")
+            print(f"Something went wrong. ")
     else:
         return priority
 
@@ -90,7 +90,7 @@ def validate_username(username, user):
             username = input("Username: ").lower().translate(
                 str.maketrans('', '', '\x00'))
         except Exception as e:
-            print(f"Something went wrong. ({type(e).__name__})")
+            print(f"Something went wrong. ")
     else:
         return username
 
@@ -119,7 +119,7 @@ def validate_password(password, user):
             password = input("Password: ").translate(
                 str.maketrans('', '', '\x00'))
         except Exception as e:
-            print(f"Something has changed. ({type(e).__name__})")
+            print(f"Something has changed. ")
     else:
         return password
 
@@ -161,7 +161,7 @@ class SuperAdmin(User):
                 log.addLogEntry(LogEntry(2, self.username, "[new user] Failed to create user."))
                 print('Failed to create user')
             except Exception as ex:
-                print(f"Something went wrong. ({type(ex).__name__})")
+                print(f"Something went wrong. ")
 
     def get_logs(self, db):
         print("Enter minimum priority of logs to retrieve from 1 to 3 where\n- 1 = important\n- 2 = moderate\n- 3 = info")
@@ -204,7 +204,7 @@ class Admin(User):
                                          "[new-user] Failed to create user"))
                 print('Failed to create user')
             except Exception as ex:
-                print(f"Something went wrong. ({type(ex).__name__})")
+                print(f"Something went wrong. ")
 
     def add_client(self, db, cities):
         print('Adding a new client')
@@ -244,7 +244,7 @@ class Admin(User):
                                          "[add-client] Failed to add client."))
                 print('Failed to add a new client')
             except Exception as ex:
-                print(f"Something went wrong. ({type(ex).__name__})")
+                print(f"Something went wrong. ")
 
 # The advisor
 class Advisor(User):
